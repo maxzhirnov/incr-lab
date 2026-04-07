@@ -1,0 +1,33 @@
+export const YANDEX_METRIKA_ID = 108434175;
+
+export const analyticsGoals = {
+  sharedScenarioOpened: "shared_scenario_opened",
+  scenarioAdjusted: "scenario_adjusted",
+  currencyChanged: "currency_changed",
+  defaultsReset: "defaults_reset",
+  shareLinkCopied: "share_link_copied",
+  insightTextCopied: "insight_text_copied",
+  snapshotDownloaded: "snapshot_downloaded",
+} as const;
+
+declare global {
+  interface Window {
+    ym?: (
+      id: number,
+      action: "init" | "reachGoal",
+      target: string,
+      params?: Record<string, unknown>,
+    ) => void;
+  }
+}
+
+export const trackGoal = (
+  goal: (typeof analyticsGoals)[keyof typeof analyticsGoals],
+  params?: Record<string, unknown>,
+) => {
+  if (typeof window === "undefined" || typeof window.ym !== "function") {
+    return;
+  }
+
+  window.ym(YANDEX_METRIKA_ID, "reachGoal", goal, params);
+};

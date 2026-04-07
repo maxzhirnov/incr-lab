@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { benchmarkRanges, getBenchmarkStatus } from "../lib/benchmarks";
 import { getCurrencyMoneyPreset } from "../lib/currencyPresets";
 import type { CurrencyCode } from "../lib/format";
@@ -30,6 +31,8 @@ export function ControlPanel({
   onCurrencyChange,
   onReset,
 }: ControlPanelProps) {
+  const panelRef = useRef<HTMLElement>(null);
+  const [desktopMaxHeight, setDesktopMaxHeight] = useState<number | null>(null);
   const maxConvertAnyway = 1 - inputs.pctPersuadable;
   const maxPersuadable = 1 - inputs.pctConvertAnyway;
   const moneyPreset = getCurrencyMoneyPreset(currency);
@@ -56,8 +59,44 @@ export function ControlPanel({
     };
   };
 
+  useEffect(() => {
+    const updateDesktopMaxHeight = () => {
+      if (!panelRef.current) {
+        return;
+      }
+
+      if (window.innerWidth <= 1100) {
+        setDesktopMaxHeight(null);
+        return;
+      }
+
+      const rect = panelRef.current.getBoundingClientRect();
+      const viewportPadding = 20;
+      const availableHeight = window.innerHeight - rect.top - viewportPadding;
+
+      setDesktopMaxHeight(Math.max(320, Math.floor(availableHeight)));
+    };
+
+    updateDesktopMaxHeight();
+    window.addEventListener("resize", updateDesktopMaxHeight);
+    window.addEventListener("scroll", updateDesktopMaxHeight, { passive: true });
+
+    return () => {
+      window.removeEventListener("resize", updateDesktopMaxHeight);
+      window.removeEventListener("scroll", updateDesktopMaxHeight);
+    };
+  }, []);
+
   return (
-    <aside className="panel controls-panel">
+    <aside
+      className="panel controls-panel"
+      ref={panelRef}
+      style={
+        desktopMaxHeight
+          ? { maxHeight: `${desktopMaxHeight}px` }
+          : undefined
+      }
+    >
       <div className="panel__header">
         <div>
           <span className="eyebrow">Scenario</span>

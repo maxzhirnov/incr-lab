@@ -8,6 +8,8 @@ export type ScenarioState = {
   hasQueryParams: boolean;
 };
 
+export const TOOL_PATH = "/retargeting";
+
 const numericParamMap: Record<keyof SimulationInputs, string> = {
   totalUsers: "users",
   pctConvertAnyway: "convertAnyway",
@@ -122,16 +124,69 @@ export const writeScenarioToUrl = (
   params.set("currency", currency);
 
   const query = params.toString();
-  const nextUrl = `${window.location.pathname}?${query}`;
+  const nextUrl = `${TOOL_PATH}?${query}`;
   window.history.replaceState({}, "", nextUrl);
 };
 
-export const clearScenarioUrl = () => {
+export const clearScenarioUrl = (path?: string) => {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.history.replaceState({}, "", window.location.pathname);
+  window.history.replaceState({}, "", path ?? window.location.pathname);
+};
+
+export const getCanonicalScenarioUrl = (
+  inputs: SimulationInputs,
+  currency: CurrencyCode,
+) => {
+  const params = new URLSearchParams();
+
+  params.set(numericParamMap.totalUsers, String(Math.round(inputs.totalUsers)));
+  params.set(
+    numericParamMap.pctConvertAnyway,
+    inputs.pctConvertAnyway.toFixed(4),
+  );
+  params.set(
+    numericParamMap.pctPersuadable,
+    inputs.pctPersuadable.toFixed(4),
+  );
+  params.set(
+    numericParamMap.retargetingReach,
+    inputs.retargetingReach.toFixed(4),
+  );
+  params.set(
+    numericParamMap.persuadableConversionLift,
+    inputs.persuadableConversionLift.toFixed(4),
+  );
+  params.set(numericParamMap.spend, String(Math.round(inputs.spend)));
+  params.set(
+    numericParamMap.revenuePerConversion,
+    String(Math.round(inputs.revenuePerConversion)),
+  );
+  params.set("currency", currency);
+
+  const origin =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "https://lab.mzhirnov.com";
+
+  return `${origin}${TOOL_PATH}?${params.toString()}`;
+};
+
+export const hasScenarioQueryParams = (search: string) => {
+  const params = new URLSearchParams(search);
+
+  return (
+    params.has(numericParamMap.totalUsers) ||
+    params.has(numericParamMap.pctConvertAnyway) ||
+    params.has(numericParamMap.pctPersuadable) ||
+    params.has(numericParamMap.retargetingReach) ||
+    params.has(numericParamMap.persuadableConversionLift) ||
+    params.has(numericParamMap.spend) ||
+    params.has(numericParamMap.revenuePerConversion) ||
+    params.has("currency")
+  );
 };
 
 export const isDefaultScenarioState = (
