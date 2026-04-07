@@ -14,7 +14,12 @@ import { defaultInputs } from "./data/defaultInputs";
 import { createFormatters, type CurrencyCode } from "./lib/format";
 import { generateSnapshotMessaging } from "./lib/snapshotMessaging";
 import { normalizeInputs, runSimulation, type SimulationInputs } from "./lib/simulation";
-import { readScenarioFromUrl, writeScenarioToUrl } from "./lib/urlState";
+import {
+  clearScenarioUrl,
+  isDefaultScenarioState,
+  readScenarioFromUrl,
+  writeScenarioToUrl,
+} from "./lib/urlState";
 
 const defaultCurrency: CurrencyCode = "USD";
 
@@ -52,6 +57,7 @@ function App() {
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [isExportingSnapshot, setIsExportingSnapshot] = useState(false);
   const exportSnapshotRef = useRef<HTMLDivElement>(null);
+  const hasHydratedFromUrlRef = useRef(initialState.hasQueryParams);
 
   const currencySafeInputs = clampMoneyInputsForCurrency(inputs, currency);
   const normalizedInputs = normalizeInputs(currencySafeInputs);
@@ -63,6 +69,23 @@ function App() {
   );
 
   useEffect(() => {
+    const isDefaultState = isDefaultScenarioState(
+      normalizedInputs,
+      currency,
+      defaultInputs,
+      defaultCurrency,
+    );
+
+    if (!hasHydratedFromUrlRef.current && isDefaultState) {
+      return;
+    }
+
+    if (isDefaultState) {
+      clearScenarioUrl();
+      return;
+    }
+
+    hasHydratedFromUrlRef.current = true;
     writeScenarioToUrl(normalizedInputs, currency);
   }, [currency, normalizedInputs]);
 
@@ -183,6 +206,8 @@ function App() {
           onReset={() => {
             setInputs(defaultInputs);
             setCurrency(defaultCurrency);
+            hasHydratedFromUrlRef.current = false;
+            clearScenarioUrl();
           }}
         />
 

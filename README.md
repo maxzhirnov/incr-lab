@@ -63,6 +63,26 @@ The difference between those two quantities is the core idea the tool is trying 
 - CSS
 - html-to-image for client-side snapshot export
 
+## Static assets
+
+For Vite, favicon and social preview assets should live in `public/`.
+
+Place the following files in:
+
+`/Users/mzhirnov/Documents/github/incrementality-lab/public`
+
+- `favicon.ico`
+- `favicon-16x16.png`
+- `favicon-32x32.png`
+- `apple-touch-icon.png`
+- `android-chrome-192x192.png`
+- `android-chrome-512x512.png`
+- `site.webmanifest`
+- `about.txt`
+- `og-image.png`
+
+The filenames should remain exactly as listed above, because `index.html` references them directly.
+
 ## Getting started
 
 Install dependencies:
