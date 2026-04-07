@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { Navbar } from "./Navbar";
 
 type AppLayoutProps = {
@@ -32,6 +33,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </div>
       </footer>
+      <Analytics />
     </div>
   );
 }
