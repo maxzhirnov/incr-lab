@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/retargeting",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/retargeting/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
+  ]
+}

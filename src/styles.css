@@ -43,6 +43,16 @@ select {
   font: inherit;
 }
 
+.site-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-main {
+  flex: 1;
+}
+
 .app-shell {
   max-width: 1440px;
   margin: 0 auto;
@@ -94,6 +104,48 @@ select {
 .site-nav__brand:focus-visible {
   outline: none;
   opacity: 0.78;
+}
+
+.site-footer {
+  margin-top: 48px;
+  border-top: 1px solid rgba(20, 35, 29, 0.08);
+}
+
+.site-footer__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 20px 36px;
+  display: grid;
+  gap: 14px;
+}
+
+.site-footer__block {
+  display: grid;
+  gap: 4px;
+}
+
+.site-footer__title {
+  color: #23352e;
+  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.site-footer__block p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.site-footer__link {
+  color: inherit;
+  text-decoration-color: rgba(20, 35, 29, 0.2);
+  text-underline-offset: 0.14em;
+}
+
+.site-footer__link:hover {
+  color: #23352e;
 }
 
 .home-shell {
