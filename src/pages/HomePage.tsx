@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { EXPERIMENT_SIZE_TOOL_PATH } from "../lib/experimentSizeUrlState";
 import { TOOL_PATH } from "../lib/urlState";
 
 export function HomePage() {
@@ -25,6 +26,18 @@ export function HomePage() {
             <p>
               Explore how retargeting can claim more conversions and ROAS than
               it actually creates incrementally.
+            </p>
+          </div>
+          <span className="tool-card__cta">Open tool</span>
+        </Link>
+
+        <Link className="tool-card" to={EXPERIMENT_SIZE_TOOL_PATH}>
+          <div className="tool-card__content">
+            <span className="eyebrow">Tool</span>
+            <h3>Experiment size calculator</h3>
+            <p>
+              Estimate sample size, MDE, duration, and whether your test design
+              is realistic before you ship it.
             </p>
           </div>
           <span className="tool-card__cta">Open tool</span>

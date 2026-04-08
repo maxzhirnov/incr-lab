@@ -81,6 +81,7 @@ export function RetargetingPage() {
       description:
         "Interactive simulation of how retargeting attribution can diverge from incremental performance.",
       url: "https://lab.mzhirnov.com/retargeting",
+      image: "https://lab.mzhirnov.com/og/retargeting.png",
     });
   }, []);
 

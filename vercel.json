@@ -2,11 +2,19 @@
   "rewrites": [
     {
       "source": "/retargeting",
-      "destination": "/index.html"
+      "destination": "/retargeting.html"
     },
     {
       "source": "/retargeting/(.*)",
-      "destination": "/index.html"
+      "destination": "/retargeting.html"
+    },
+    {
+      "source": "/experiment-size",
+      "destination": "/experiment-size.html"
+    },
+    {
+      "source": "/experiment-size/(.*)",
+      "destination": "/experiment-size.html"
     },
     {
       "source": "/",

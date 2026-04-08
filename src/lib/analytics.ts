@@ -8,6 +8,10 @@ export const analyticsGoals = {
   shareLinkCopied: "share_link_copied",
   insightTextCopied: "insight_text_copied",
   snapshotDownloaded: "snapshot_downloaded",
+  experimentSizeScenarioAdjusted: "experiment_size_scenario_adjusted",
+  experimentSizeShareLinkCopied: "experiment_size_share_link_copied",
+  experimentSizeInsightCopied: "experiment_size_insight_copied",
+  experimentSizeSnapshotDownloaded: "experiment_size_snapshot_downloaded",
 } as const;
 
 declare global {
