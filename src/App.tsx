@@ -2,11 +2,13 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import { EXPERIMENT_SIZE_TOOL_PATH } from "./lib/experimentSizeUrlState";
 import { applyMetadata } from "./lib/metadata";
+import { UTM_BUILDER_PATH } from "./lib/utmBuilder";
 import { TOOL_PATH } from "./lib/urlState";
 import { ExperimentSizePage } from "./pages/ExperimentSizePage";
 import { HomePage } from "./pages/HomePage";
 import { LegacyScenarioRedirect } from "./pages/LegacyScenarioRedirect";
 import { RetargetingPage } from "./pages/RetargetingPage";
+import { UtmBuilderPage } from "./pages/UtmBuilderPage";
 import { useEffect } from "react";
 
 function HomeRoute() {
@@ -46,6 +48,7 @@ function App() {
         <Route path="/" element={<HomeRoute />} />
         <Route path={TOOL_PATH} element={<RetargetingPage />} />
         <Route path={EXPERIMENT_SIZE_TOOL_PATH} element={<ExperimentSizePage />} />
+        <Route path={UTM_BUILDER_PATH} element={<UtmBuilderPage />} />
         <Route path="*" element={<Navigate replace to="/" />} />
       </Routes>
     </AppLayout>

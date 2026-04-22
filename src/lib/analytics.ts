@@ -12,6 +12,9 @@ export const analyticsGoals = {
   experimentSizeShareLinkCopied: "experiment_size_share_link_copied",
   experimentSizeInsightCopied: "experiment_size_insight_copied",
   experimentSizeSnapshotDownloaded: "experiment_size_snapshot_downloaded",
+  utmBuilderAdjusted: "utm_builder_adjusted",
+  utmBuilderUrlCopied: "utm_builder_url_copied",
+  utmBuilderParamsCopied: "utm_builder_params_copied",
 } as const;
 
 declare global {

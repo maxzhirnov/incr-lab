@@ -17,6 +17,14 @@
       "destination": "/experiment-size.html"
     },
     {
+      "source": "/utm-builder",
+      "destination": "/utm-builder.html"
+    },
+    {
+      "source": "/utm-builder/(.*)",
+      "destination": "/utm-builder.html"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
     }
