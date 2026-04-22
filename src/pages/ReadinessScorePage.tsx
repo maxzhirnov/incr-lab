@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { toPng } from "html-to-image";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { analyticsGoals, trackGoal } from "../lib/analytics";
 import { applyMetadata } from "../lib/metadata";
 import {
@@ -10,6 +10,7 @@ import {
   getCanonicalReadinessUrl,
   frameworkDimensions,
   isDefaultReadinessState,
+  READINESS_FRAMEWORK_PATH,
   readReadinessFromUrl,
   readinessQuestions,
   writeReadinessToUrl,
@@ -129,6 +130,7 @@ export function ReadinessScorePage() {
   const [hasTrackedEdit, setHasTrackedEdit] = useState(false);
   const [isExportingSnapshot, setIsExportingSnapshot] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [hasSavedBenchmarkIntent, setHasSavedBenchmarkIntent] = useState(false);
   const [hasCompletedWizard, setHasCompletedWizard] = useState(
     initialState.hasQueryParams,
   );
@@ -285,6 +287,20 @@ export function ReadinessScorePage() {
     }
   };
 
+  const handleSaveBenchmarkIntent = () => {
+    window.localStorage.setItem(
+      "incrementality-readiness-benchmark-intent",
+      JSON.stringify({
+        score: result.score,
+        level: result.level,
+        blocker: result.blocker.label,
+        createdAt: new Date().toISOString(),
+      }),
+    );
+    setHasSavedBenchmarkIntent(true);
+    setFeedback("Anonymous benchmark intent saved locally");
+  };
+
   const snapshot = (
     <article className="readiness-snapshot-card">
       <span className="eyebrow">Incrementality Lab</span>
@@ -433,7 +449,7 @@ export function ReadinessScorePage() {
           <section className="panel readiness-result-panel">
             <div className="panel__header panel__header--stacked">
               <div>
-                <span className="eyebrow">Audit readout</span>
+              <span className="eyebrow">Audit readout</span>
                 <h2>{result.level}</h2>
                 <p>{maturityReads[result.level]}</p>
               </div>
@@ -456,6 +472,28 @@ export function ReadinessScorePage() {
               <p>{result.blocker.read}</p>
             </div>
 
+            <div className="readiness-test-design-card">
+              <span>Recommended test design</span>
+              <strong>{result.recommendedDesign.name}</strong>
+              <p>{result.recommendedDesign.fit}</p>
+              <small>{result.recommendedDesign.caution}</small>
+            </div>
+
+            <div className="readiness-executive-summary">
+              <article>
+                <span>Can test now</span>
+                <p>{result.canTestNow}</p>
+              </article>
+              <article>
+                <span>Not yet</span>
+                <p>{result.notYet}</p>
+              </article>
+              <article>
+                <span>Executive ask</span>
+                <p>{result.boardMemo.ask}</p>
+              </article>
+            </div>
+
             {result.limitingConstraints.length > 0 ? (
               <div className="readiness-hard-constraints">
                 <span>Hard constraints</span>
@@ -466,38 +504,6 @@ export function ReadinessScorePage() {
                 ))}
               </div>
             ) : null}
-
-            <div className="readiness-test-design-card">
-              <span>Recommended test design</span>
-              <strong>{result.recommendedDesign.name}</strong>
-              <p>{result.recommendedDesign.fit}</p>
-              <small>{result.recommendedDesign.caution}</small>
-            </div>
-
-            <div className="readiness-board-memo">
-              <span>Board-ready memo</span>
-              <strong>{result.boardMemo.headline}</strong>
-              <p>{result.boardMemo.body}</p>
-              <small>{result.boardMemo.ask}</small>
-            </div>
-
-            <div className="readiness-client-report">
-              <span>Client-ready report</span>
-              {result.clientReadyReport.map((item) => (
-                <p key={item}>{item}</p>
-              ))}
-            </div>
-
-            <div className="readiness-decision-grid">
-              <article>
-                <span>Can test now</span>
-                <p>{result.canTestNow}</p>
-              </article>
-              <article>
-                <span>Not yet</span>
-                <p>{result.notYet}</p>
-              </article>
-            </div>
 
             <div className="readiness-actions">
               <button
@@ -533,12 +539,28 @@ export function ReadinessScorePage() {
                 }}
                 type="button"
               >
-                Reset
+              Reset
               </button>
             </div>
             <span className={`hero-feedback${feedback ? " hero-feedback--visible" : ""}`}>
               {feedback ?? "Copy a strategy-ready audit summary."}
             </span>
+          </section>
+
+          <section className="panel readiness-board-panel">
+            <div className="readiness-board-memo">
+              <span>Board-ready memo</span>
+              <strong>{result.boardMemo.headline}</strong>
+              <p>{result.boardMemo.body}</p>
+              <small>{result.boardMemo.ask}</small>
+            </div>
+
+            <div className="readiness-client-report">
+              <span>Client-ready report</span>
+              {result.clientReadyReport.map((item) => (
+                <p key={item}>{item}</p>
+              ))}
+            </div>
           </section>
 
           <section className="panel readiness-roadmap-panel">
@@ -650,6 +672,31 @@ export function ReadinessScorePage() {
                 <p>The suggested test design changes with signal, control-group feasibility, and organizational readiness.</p>
               </article>
             </div>
+            <Link className="ghost-button hero-action readiness-methodology-link" to={READINESS_FRAMEWORK_PATH}>
+              Read full framework
+            </Link>
+          </section>
+
+          <section className="panel readiness-benchmark-save-panel">
+            <div className="panel__header panel__header--stacked">
+              <div>
+                <span className="eyebrow">Benchmark dataset</span>
+                <h2>Help build anonymous readiness benchmarks</h2>
+                <p>
+                  This stores only a local intent marker for now. It is a
+                  product placeholder for a future opt-in anonymous benchmark
+                  dataset.
+                </p>
+              </div>
+            </div>
+            <button
+              className="ghost-button hero-action"
+              disabled={hasSavedBenchmarkIntent}
+              onClick={handleSaveBenchmarkIntent}
+              type="button"
+            >
+              {hasSavedBenchmarkIntent ? "Intent saved locally" : "Save anonymous benchmark intent"}
+            </button>
           </section>
 
           <section className="panel readiness-article-panel">

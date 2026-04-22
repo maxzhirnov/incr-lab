@@ -1,4 +1,5 @@
 export const READINESS_SCORE_PATH = "/incrementality-readiness";
+export const READINESS_FRAMEWORK_PATH = "/incrementality-readiness-framework";
 
 export type ReadinessLevel =
   | "Attribution-dependent"

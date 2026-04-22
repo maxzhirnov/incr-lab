@@ -33,6 +33,14 @@
       "destination": "/incrementality-readiness.html"
     },
     {
+      "source": "/incrementality-readiness-framework",
+      "destination": "/incrementality-readiness-framework.html"
+    },
+    {
+      "source": "/incrementality-readiness-framework/(.*)",
+      "destination": "/incrementality-readiness-framework.html"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
     }

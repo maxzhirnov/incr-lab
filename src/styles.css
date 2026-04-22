@@ -2407,6 +2407,39 @@ select {
   line-height: 1.45;
 }
 
+.readiness-executive-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.readiness-executive-summary article {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 132px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(20, 35, 29, 0.08);
+}
+
+.readiness-executive-summary span {
+  color: #8c4b10;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.readiness-executive-summary p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.42;
+}
+
 .readiness-hard-constraints {
   display: grid;
   gap: 8px;
@@ -2781,6 +2814,11 @@ select {
   padding: 22px;
 }
 
+.readiness-board-panel,
+.readiness-benchmark-save-panel {
+  padding: 22px;
+}
+
 .readiness-methodology-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2794,6 +2832,12 @@ select {
 
 .readiness-methodology-grid--compact {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.readiness-methodology-link {
+  width: fit-content;
+  margin-top: 14px;
+  text-decoration: none;
 }
 
 .readiness-article-grid {
@@ -3044,6 +3088,7 @@ select {
   .readiness-input-grid,
   .readiness-risk-grid,
   .readiness-decision-grid,
+  .readiness-executive-summary,
   .readiness-methodology-grid,
   .readiness-article-grid {
     grid-template-columns: 1fr;

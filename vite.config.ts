@@ -11,6 +11,7 @@ export default defineConfig({
         experimentSize: new URL("./experiment-size.html", import.meta.url).pathname,
         utmBuilder: new URL("./utm-builder.html", import.meta.url).pathname,
         readinessScore: new URL("./incrementality-readiness.html", import.meta.url).pathname,
+        readinessFramework: new URL("./incrementality-readiness-framework.html", import.meta.url).pathname,
       },
     },
   },

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { EXPERIMENT_SIZE_TOOL_PATH } from "../lib/experimentSizeUrlState";
-import { READINESS_SCORE_PATH } from "../lib/readinessScore";
+import { READINESS_FRAMEWORK_PATH, READINESS_SCORE_PATH } from "../lib/readinessScore";
 import { UTM_BUILDER_PATH } from "../lib/utmBuilder";
 import { TOOL_PATH } from "../lib/urlState";
 
@@ -36,6 +36,14 @@ const currentTools = [
       "Diagnose whether a marketing team is ready to make causal budget decisions with lift tests and holdouts.",
     cta: "Run diagnostic",
     to: READINESS_SCORE_PATH,
+  },
+  {
+    category: "Measurement Strategy",
+    name: "Incrementality Readiness Framework",
+    description:
+      "Read the five-dimension framework behind the diagnostic and how to turn readiness into a measurement roadmap.",
+    cta: "Read framework",
+    to: READINESS_FRAMEWORK_PATH,
   },
 ];
 
