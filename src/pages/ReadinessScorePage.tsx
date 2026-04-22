@@ -130,7 +130,6 @@ export function ReadinessScorePage() {
   const [hasTrackedEdit, setHasTrackedEdit] = useState(false);
   const [isExportingSnapshot, setIsExportingSnapshot] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [hasSavedBenchmarkIntent, setHasSavedBenchmarkIntent] = useState(false);
   const [hasCompletedWizard, setHasCompletedWizard] = useState(
     initialState.hasQueryParams,
   );
@@ -285,20 +284,6 @@ export function ReadinessScorePage() {
     } finally {
       setIsExportingSnapshot(false);
     }
-  };
-
-  const handleSaveBenchmarkIntent = () => {
-    window.localStorage.setItem(
-      "incrementality-readiness-benchmark-intent",
-      JSON.stringify({
-        score: result.score,
-        level: result.level,
-        blocker: result.blocker.label,
-        createdAt: new Date().toISOString(),
-      }),
-    );
-    setHasSavedBenchmarkIntent(true);
-    setFeedback("Anonymous benchmark intent saved locally");
   };
 
   const snapshot = (
@@ -675,28 +660,6 @@ export function ReadinessScorePage() {
             <Link className="ghost-button hero-action readiness-methodology-link" to={READINESS_FRAMEWORK_PATH}>
               Read full framework
             </Link>
-          </section>
-
-          <section className="panel readiness-benchmark-save-panel">
-            <div className="panel__header panel__header--stacked">
-              <div>
-                <span className="eyebrow">Benchmark dataset</span>
-                <h2>Help build anonymous readiness benchmarks</h2>
-                <p>
-                  This stores only a local intent marker for now. It is a
-                  product placeholder for a future opt-in anonymous benchmark
-                  dataset.
-                </p>
-              </div>
-            </div>
-            <button
-              className="ghost-button hero-action"
-              disabled={hasSavedBenchmarkIntent}
-              onClick={handleSaveBenchmarkIntent}
-              type="button"
-            >
-              {hasSavedBenchmarkIntent ? "Intent saved locally" : "Save anonymous benchmark intent"}
-            </button>
           </section>
 
           <section className="panel readiness-article-panel">
