@@ -51,6 +51,33 @@ const sections = Array.from(
   new Set(readinessQuestions.map((question) => question.section)),
 );
 
+const numberFormatter = new Intl.NumberFormat("en-US");
+
+const questionExamples: Record<string, string> = {
+  source_of_truth:
+    "Example: if GA4 says 1,000 purchases but finance recognizes 830 paid orders, decide which one the test will use before launch.",
+  campaign_taxonomy:
+    "Example: paid_social, paidsocial, Paid Social, and meta_paid should not all appear as separate channel values.",
+  metric_hierarchy:
+    "Example: incremental revenue can be primary while CAC, refund rate, and gross margin act as guardrails.",
+  test_unit:
+    "Example: a real control can be a holdout audience, untreated geos, or matched markets that do not receive the campaign change.",
+  noise_control:
+    "Example: a Black Friday promo, product launch, or pricing change can swamp the campaign effect.",
+  spend_concentration:
+    "Example: testing works better if one channel or region can receive a meaningful spend change instead of many tiny changes.",
+  decision_rule:
+    "Example: if lift is below 3% or confidence is weak, budget stays flat or moves to a follow-up test.",
+  attribution_authority:
+    "Example: if Meta ROAS says scale but the holdout says no lift, decide which signal wins.",
+  finance_alignment:
+    "Example: finance should agree upfront whether incremental revenue, profit, or CAC is the budget evidence.",
+  owner:
+    "Example: one person or group should own the readout, even if marketing, analytics, and finance all contribute.",
+  stakeholder_buy_in:
+    "Example: the test should answer one primary question, not become a container for every channel debate.",
+};
+
 type NumberFieldProps = {
   label: string;
   min: number;
@@ -70,16 +97,23 @@ function NumberField({
   suffix,
   value,
 }: NumberFieldProps) {
+  const displayValue = Number.isFinite(value) ? numberFormatter.format(value) : "";
+  const parseValue = (rawValue: string) => {
+    const parsed = Number(rawValue.replace(/[^\d]/g, ""));
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
   return (
     <label className="readiness-number-field">
       <span>{label}</span>
       <div className="readiness-number-field__input">
         <input
+          inputMode="numeric"
           min={min}
-          onChange={(event) => onChange(name, Number(event.target.value))}
+          onChange={(event) => onChange(name, parseValue(event.target.value))}
           step={step}
-          type="number"
-          value={value}
+          type="text"
+          value={displayValue}
         />
         {suffix ? <small>{suffix}</small> : null}
       </div>
@@ -94,11 +128,19 @@ export function ReadinessScorePage() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [hasTrackedEdit, setHasTrackedEdit] = useState(false);
   const [isExportingSnapshot, setIsExportingSnapshot] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [hasCompletedWizard, setHasCompletedWizard] = useState(
+    initialState.hasQueryParams,
+  );
+  const [wizardStep, setWizardStep] = useState(0);
   const hasHydratedFromUrlRef = useRef(initialState.hasQueryParams);
   const exportSnapshotRef = useRef<HTMLDivElement>(null);
 
   const result = useMemo(() => evaluateReadiness(inputs), [inputs]);
   const reportText = useMemo(() => formatReadinessReport(inputs), [inputs]);
+  const wizardTotalSteps = readinessQuestions.length + 1;
+  const currentWizardQuestion =
+    wizardStep > 0 ? readinessQuestions[wizardStep - 1] : null;
 
   useEffect(() => {
     applyMetadata({
@@ -153,7 +195,7 @@ export function ReadinessScorePage() {
     trackEdit();
     setInputs((currentInputs) => ({
       ...currentInputs,
-      [name]: Math.max(0, value),
+      [name]: Math.max(name === "channels" ? 1 : 0, value),
     }));
   };
 
@@ -166,6 +208,30 @@ export function ReadinessScorePage() {
         [questionId]: optionId,
       },
     }));
+  };
+
+  const openWizard = () => {
+    setWizardStep(0);
+    setIsWizardOpen(true);
+  };
+
+  const closeWizard = () => {
+    setIsWizardOpen(false);
+  };
+
+  const goToNextWizardStep = () => {
+    if (wizardStep >= wizardTotalSteps - 1) {
+      setHasCompletedWizard(true);
+      setIsWizardOpen(false);
+      setFeedback("Guided audit completed");
+      return;
+    }
+
+    setWizardStep((currentStep) => currentStep + 1);
+  };
+
+  const goToPreviousWizardStep = () => {
+    setWizardStep((currentStep) => Math.max(0, currentStep - 1));
   };
 
   const handleCopyReport = async () => {
@@ -257,11 +323,31 @@ export function ReadinessScorePage() {
             <div>
               <span className="eyebrow">Guided audit</span>
               <h2>Answer what is true today</h2>
-                <p>
-                  The options are intentionally specific, so the score has an
-                evidence trail instead of subjective maturity ratings.
-                </p>
+              <p>
+                Start with the guided flow, then use this page for quick
+                corrections and what-if changes.
+              </p>
             </div>
+          </div>
+
+          <div className="readiness-start-card">
+            <div>
+              <strong>
+                {hasCompletedWizard ? "Guided audit complete" : "Start with a focused walkthrough"}
+              </strong>
+              <p>
+                {hasCompletedWizard
+                  ? "You can reopen the walkthrough or adjust any answer below."
+                  : "One question at a time, with examples and fewer distractions."}
+              </p>
+            </div>
+            <button
+              className="hero-button hero-button--primary hero-action"
+              onClick={openWizard}
+              type="button"
+            >
+              {hasCompletedWizard ? "Review guided audit" : "Start guided audit"}
+            </button>
           </div>
 
           <div className="readiness-input-grid">
@@ -291,45 +377,56 @@ export function ReadinessScorePage() {
             />
           </div>
 
-          <div className="readiness-question-list">
-            {sections.map((section) => (
-              <section className="readiness-question-section" key={section}>
-                <h3>{section}</h3>
-                {readinessQuestions
-                  .filter((question) => question.section === section)
-                  .map((question) => (
-                    <article className="readiness-question" key={question.id}>
-                      <div className="readiness-question__header">
-                        <h4>{question.question}</h4>
-                        <p>{question.why}</p>
-                      </div>
-                      <div className="readiness-option-grid">
-                        {question.options.map((option) => {
-                          const isSelected =
-                            inputs.answers[question.id] === option.id;
+          {hasCompletedWizard ? (
+            <div className="readiness-question-list">
+              {sections.map((section) => (
+                <section className="readiness-question-section" key={section}>
+                  <h3>{section}</h3>
+                  {readinessQuestions
+                    .filter((question) => question.section === section)
+                    .map((question) => (
+                      <article className="readiness-question" key={question.id}>
+                        <div className="readiness-question__header">
+                          <h4>{question.question}</h4>
+                          <p>{question.why}</p>
+                        </div>
+                        <div className="readiness-option-grid">
+                          {question.options.map((option) => {
+                            const isSelected =
+                              inputs.answers[question.id] === option.id;
 
-                          return (
-                            <button
-                              className={
-                                isSelected
-                                  ? "readiness-option readiness-option--selected"
-                                  : "readiness-option"
-                              }
-                              key={option.id}
-                              onClick={() => updateAnswer(question.id, option.id)}
-                              type="button"
-                            >
-                              <span>{option.label}</span>
-                              <small>{option.evidence}</small>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </article>
-                  ))}
-              </section>
-            ))}
-          </div>
+                            return (
+                              <button
+                                className={
+                                  isSelected
+                                    ? "readiness-option readiness-option--selected"
+                                    : "readiness-option"
+                                }
+                                key={option.id}
+                                onClick={() => updateAnswer(question.id, option.id)}
+                                type="button"
+                              >
+                                <span>{option.label}</span>
+                                <small>{option.evidence}</small>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </article>
+                    ))}
+                </section>
+              ))}
+            </div>
+          ) : (
+            <div className="readiness-editor-placeholder">
+              <strong>Detailed answers are hidden until the walkthrough is complete.</strong>
+              <p>
+                This keeps the first pass focused. After the guided audit, the
+                full nonlinear editor appears here for corrections and what-if
+                adjustments.
+              </p>
+            </div>
+          )}
         </section>
 
         <section className="readiness-output-stack">
@@ -430,6 +527,7 @@ export function ReadinessScorePage() {
                 onClick={() => {
                   setInputs(defaultReadinessInputs);
                   hasHydratedFromUrlRef.current = false;
+                  setHasCompletedWizard(false);
                   clearScenarioUrl(READINESS_SCORE_PATH);
                   setFeedback("Reset to example");
                 }}
@@ -592,6 +690,130 @@ export function ReadinessScorePage() {
       <div className="snapshot-export-root" aria-hidden="true">
         <div ref={exportSnapshotRef}>{snapshot}</div>
       </div>
+
+      {isWizardOpen ? (
+        <div className="readiness-wizard" role="dialog" aria-modal="true">
+          <div className="readiness-wizard__panel">
+            <header className="readiness-wizard__header">
+              <div>
+                <span className="eyebrow">Guided audit</span>
+                <h2>
+                  {currentWizardQuestion
+                    ? currentWizardQuestion.section
+                    : "Business signal"}
+                </h2>
+              </div>
+              <button
+                aria-label="Close guided audit"
+                className="control-number-input__clear"
+                onClick={closeWizard}
+                type="button"
+              >
+                x
+              </button>
+            </header>
+
+            <div className="readiness-wizard__progress">
+              <span style={{ width: `${((wizardStep + 1) / wizardTotalSteps) * 100}%` }} />
+            </div>
+
+            {currentWizardQuestion ? (
+              <section className="readiness-wizard__content">
+                <span className="readiness-wizard__step">
+                  Question {wizardStep} of {readinessQuestions.length}
+                </span>
+                <h3>{currentWizardQuestion.question}</h3>
+                <p>{currentWizardQuestion.why}</p>
+                <p className="readiness-wizard__example">
+                  {questionExamples[currentWizardQuestion.id]}
+                </p>
+                <div className="readiness-wizard__options">
+                  {currentWizardQuestion.options.map((option) => {
+                    const isSelected =
+                      inputs.answers[currentWizardQuestion.id] === option.id;
+
+                    return (
+                      <button
+                        className={
+                          isSelected
+                            ? "readiness-option readiness-option--selected"
+                            : "readiness-option"
+                        }
+                        key={option.id}
+                        onClick={() =>
+                          updateAnswer(currentWizardQuestion.id, option.id)
+                        }
+                        type="button"
+                      >
+                        <span>{option.label}</span>
+                        <small>{option.evidence}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : (
+              <section className="readiness-wizard__content">
+                <span className="readiness-wizard__step">Step 1 of {wizardTotalSteps}</span>
+                <h3>Start with the amount of measurable signal</h3>
+                <p>
+                  Conversion volume and media spend set a practical ceiling on
+                  what kind of incrementality readout can be trusted.
+                </p>
+                <p className="readiness-wizard__example">
+                  Example: 12 conversions per month can still be useful for
+                  diagnostics, but it is usually too noisy for lift-based budget
+                  decisions.
+                </p>
+                <div className="readiness-input-grid readiness-input-grid--wizard">
+                  <NumberField
+                    label="Monthly conversions"
+                    min={0}
+                    name="monthlyConversions"
+                    onChange={updateNumberInput}
+                    step={50}
+                    value={inputs.monthlyConversions}
+                  />
+                  <NumberField
+                    label="Monthly media spend"
+                    min={0}
+                    name="monthlySpend"
+                    onChange={updateNumberInput}
+                    step={1000}
+                    suffix="$"
+                    value={inputs.monthlySpend}
+                  />
+                  <NumberField
+                    label="Active paid channels"
+                    min={1}
+                    name="channels"
+                    onChange={updateNumberInput}
+                    value={inputs.channels}
+                  />
+                </div>
+              </section>
+            )}
+
+            <footer className="readiness-wizard__footer">
+              <button
+                className="ghost-button hero-action"
+                disabled={wizardStep === 0}
+                onClick={goToPreviousWizardStep}
+                type="button"
+              >
+                Back
+              </button>
+              <button
+                className="hero-button hero-button--primary hero-action"
+                onClick={goToNextWizardStep}
+                type="button"
+              >
+                {wizardStep >= wizardTotalSteps - 1 ? "Finish audit" : "Next"}
+              </button>
+            </footer>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

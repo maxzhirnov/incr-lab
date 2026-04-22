@@ -413,11 +413,11 @@ export const readinessQuestions: ReadinessQuestion[] = [
 ];
 
 export const defaultReadinessInputs: ReadinessInputs = {
-  monthlyConversions: 1200,
-  monthlySpend: 85000,
-  channels: 5,
+  monthlyConversions: 0,
+  monthlySpend: 0,
+  channels: 1,
   answers: Object.fromEntries(
-    readinessQuestions.map((question) => [question.id, question.options[1].id]),
+    readinessQuestions.map((question) => [question.id, question.options[0].id]),
   ),
 };
 
