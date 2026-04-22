@@ -4,7 +4,15 @@ import { READINESS_FRAMEWORK_PATH, READINESS_SCORE_PATH } from "../lib/readiness
 import { UTM_BUILDER_PATH } from "../lib/utmBuilder";
 import { TOOL_PATH } from "../lib/urlState";
 
-const currentTools = [
+const utilityTools = [
+  {
+    category: "Measurement Strategy",
+    name: "Incrementality Readiness Score",
+    description:
+      "A guided diagnostic that turns the framework into a readiness score, blocker, and next testing move.",
+    cta: "Run diagnostic",
+    to: READINESS_SCORE_PATH,
+  },
   {
     category: "Attribution",
     name: "Retargeting simulation",
@@ -28,22 +36,6 @@ const currentTools = [
       "Create clean campaign links with instant validation, consistent naming, and one-click copying.",
     cta: "Build UTM link",
     to: UTM_BUILDER_PATH,
-  },
-  {
-    category: "Measurement Strategy",
-    name: "Incrementality Readiness Score",
-    description:
-      "Diagnose whether a marketing team is ready to make causal budget decisions with lift tests and holdouts.",
-    cta: "Run diagnostic",
-    to: READINESS_SCORE_PATH,
-  },
-  {
-    category: "Measurement Strategy",
-    name: "Incrementality Readiness Framework",
-    description:
-      "Read the five-dimension framework behind the diagnostic and how to turn readiness into a measurement roadmap.",
-    cta: "Read framework",
-    to: READINESS_FRAMEWORK_PATH,
   },
 ];
 
@@ -73,24 +65,62 @@ export function HomePage() {
     <main className="home-shell">
       <section className="home-hero">
         <span className="eyebrow">Incrementality Lab</span>
-        <h1>Interactive tools to understand real marketing impact</h1>
+        <h1>A practical framework for trusting incrementality decisions</h1>
         <p>
-          A focused set of simulations for understanding where reported
-          performance diverges from real business impact.
+          Diagnose whether a team has enough signal, governance, and decision
+          clarity to run tests that can actually change budget allocation.
         </p>
+        <div className="home-hero__actions">
+          <Link className="tool-card__cta" to={READINESS_FRAMEWORK_PATH}>
+            Read the framework
+          </Link>
+          <Link className="ghost-button hero-action" to={READINESS_SCORE_PATH}>
+            Run readiness score
+          </Link>
+        </div>
+      </section>
+
+      <section className="home-featured">
+        <div className="home-featured__copy">
+          <span className="eyebrow">Featured framework</span>
+          <h2>Incrementality Readiness Framework</h2>
+          <p>
+            A five-dimension model for separating teams that are ready for
+            causal measurement from teams that first need stronger data,
+            decision rules, or experimental constraints.
+          </p>
+        </div>
+        <div className="home-featured__grid" aria-label="Framework dimensions">
+          <article>
+            <strong>Data foundation</strong>
+            <span>Enough clean conversion signal to read a test.</span>
+          </article>
+          <article>
+            <strong>Experiment design</strong>
+            <span>A feasible holdout, geo split, or switchback path.</span>
+          </article>
+          <article>
+            <strong>Decision governance</strong>
+            <span>Agreement on what changes if the result is clear.</span>
+          </article>
+          <article>
+            <strong>Business actionability</strong>
+            <span>Budget and planning cycles that can absorb the answer.</span>
+          </article>
+        </div>
       </section>
 
       <section className="home-tools">
         <div className="home-tools__header">
-          <h2>Current tools</h2>
+          <h2>Tools</h2>
           <p>
-            A growing set of productized workflows for attribution,
-            experimentation, and measurement.
+            Focused workflows that turn measurement thinking into usable
+            decisions.
           </p>
         </div>
 
         <div className="home-tools__grid">
-          {currentTools.map((tool) => (
+          {utilityTools.map((tool) => (
             <Link className="tool-card" key={tool.name} to={tool.to}>
               <div className="tool-card__content">
                 <div className="tool-card__meta">
