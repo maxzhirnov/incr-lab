@@ -79,6 +79,14 @@ CARDS = [
         "left_accent": (138, 212, 193),
         "right_accent": (243, 200, 122),
     },
+    {
+        "path": OUTPUT_DIR / "incrementality-readiness.png",
+        "badge": "Tool",
+        "title": "Incrementality\nReadiness Score",
+        "subtitle": "Diagnose whether a team is ready to make causal marketing budget decisions.",
+        "left_accent": (126, 202, 184),
+        "right_accent": (238, 196, 108),
+    },
 ]
 
 

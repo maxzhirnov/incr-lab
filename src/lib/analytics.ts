@@ -15,6 +15,10 @@ export const analyticsGoals = {
   utmBuilderAdjusted: "utm_builder_adjusted",
   utmBuilderUrlCopied: "utm_builder_url_copied",
   utmBuilderParamsCopied: "utm_builder_params_copied",
+  readinessScoreAdjusted: "readiness_score_adjusted",
+  readinessReportCopied: "readiness_report_copied",
+  readinessShareLinkCopied: "readiness_share_link_copied",
+  readinessSnapshotDownloaded: "readiness_snapshot_downloaded",
 } as const;
 
 declare global {

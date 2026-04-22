@@ -25,6 +25,14 @@
       "destination": "/utm-builder.html"
     },
     {
+      "source": "/incrementality-readiness",
+      "destination": "/incrementality-readiness.html"
+    },
+    {
+      "source": "/incrementality-readiness/(.*)",
+      "destination": "/incrementality-readiness.html"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
     }

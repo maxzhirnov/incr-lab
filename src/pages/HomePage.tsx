@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { EXPERIMENT_SIZE_TOOL_PATH } from "../lib/experimentSizeUrlState";
+import { READINESS_SCORE_PATH } from "../lib/readinessScore";
 import { UTM_BUILDER_PATH } from "../lib/utmBuilder";
 import { TOOL_PATH } from "../lib/urlState";
 
@@ -27,6 +28,14 @@ const currentTools = [
       "Create clean campaign links with instant validation, consistent naming, and one-click copying.",
     cta: "Build UTM link",
     to: UTM_BUILDER_PATH,
+  },
+  {
+    category: "Measurement Strategy",
+    name: "Incrementality Readiness Score",
+    description:
+      "Diagnose whether a marketing team is ready to make causal budget decisions with lift tests and holdouts.",
+    cta: "Run diagnostic",
+    to: READINESS_SCORE_PATH,
   },
 ];
 

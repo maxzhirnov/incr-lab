@@ -10,6 +10,7 @@ export default defineConfig({
         retargeting: new URL("./retargeting.html", import.meta.url).pathname,
         experimentSize: new URL("./experiment-size.html", import.meta.url).pathname,
         utmBuilder: new URL("./utm-builder.html", import.meta.url).pathname,
+        readinessScore: new URL("./incrementality-readiness.html", import.meta.url).pathname,
       },
     },
   },
