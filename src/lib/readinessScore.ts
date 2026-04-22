@@ -62,6 +62,11 @@ export type BoardMemo = {
   ask: string;
 };
 
+export type LimitingConstraint = {
+  label: string;
+  read: string;
+};
+
 export const dimensionLabels: Record<ReadinessDimensionKey, string> = {
   data: "Data foundation",
   design: "Experiment design",
@@ -418,15 +423,19 @@ export const defaultReadinessInputs: ReadinessInputs = {
 
 const getVolumeScore = (inputs: ReadinessInputs) => {
   const conversionScore =
-    inputs.monthlyConversions >= 5000
+    inputs.monthlyConversions >= 10000
       ? 100
-      : inputs.monthlyConversions >= 1500
-        ? 82
-        : inputs.monthlyConversions >= 500
-          ? 62
-          : inputs.monthlyConversions >= 150
-            ? 38
-            : 18;
+      : inputs.monthlyConversions >= 5000
+        ? 90
+        : inputs.monthlyConversions >= 1500
+          ? 78
+          : inputs.monthlyConversions >= 500
+            ? 58
+            : inputs.monthlyConversions >= 150
+              ? 38
+              : inputs.monthlyConversions >= 50
+                ? 24
+                : 8;
 
   const spendScore =
     inputs.monthlySpend >= 250000
@@ -442,7 +451,61 @@ const getVolumeScore = (inputs: ReadinessInputs) => {
   const channelScore =
     inputs.channels >= 4 ? 82 : inputs.channels >= 2 ? 64 : 42;
 
-  return Math.round(conversionScore * 0.5 + spendScore * 0.35 + channelScore * 0.15);
+  return Math.round(conversionScore * 0.62 + spendScore * 0.26 + channelScore * 0.12);
+};
+
+const getSignalCap = (inputs: ReadinessInputs) => {
+  if (inputs.monthlyConversions < 25) {
+    return 34;
+  }
+
+  if (inputs.monthlyConversions < 50) {
+    return 40;
+  }
+
+  if (inputs.monthlyConversions < 150) {
+    return 48;
+  }
+
+  if (inputs.monthlyConversions < 500) {
+    return 60;
+  }
+
+  if (inputs.monthlyConversions < 1500) {
+    return 74;
+  }
+
+  return 100;
+};
+
+const getLimitingConstraints = (inputs: ReadinessInputs): LimitingConstraint[] => {
+  const constraints: LimitingConstraint[] = [];
+
+  if (inputs.monthlyConversions < 25) {
+    constraints.push({
+      label: "Extremely low conversion signal",
+      read: "With fewer than 25 conversions per month, most lift tests will be too noisy for budget decisions.",
+    });
+  } else if (inputs.monthlyConversions < 150) {
+    constraints.push({
+      label: "Low conversion signal",
+      read: "Conversion volume is likely too thin for anything beyond directional or diagnostic testing.",
+    });
+  } else if (inputs.monthlyConversions < 500) {
+    constraints.push({
+      label: "Limited conversion signal",
+      read: "A narrow holdout may be possible, but broad geo or multi-channel testing is likely underpowered.",
+    });
+  }
+
+  if (inputs.monthlySpend < 7500) {
+    constraints.push({
+      label: "Low media spend",
+      read: "Treatment changes may be too small to separate from normal business noise.",
+    });
+  }
+
+  return constraints;
 };
 
 const getSelectedOption = (question: ReadinessQuestion, answerId: string) =>
@@ -469,6 +532,8 @@ export const evaluateReadiness = (inputs: ReadinessInputs) => {
     evidence.find((item) => item.question.id === questionId)?.option.id;
 
   const volumeScore = getVolumeScore(inputs);
+  const signalCap = getSignalCap(inputs);
+  const limitingConstraints = getLimitingConstraints(inputs);
   const dimensionScores = (Object.keys(dimensionLabels) as ReadinessDimensionKey[])
     .map((key) => {
       if (key === "volume") {
@@ -478,7 +543,11 @@ export const evaluateReadiness = (inputs: ReadinessInputs) => {
           score: volumeScore,
           status: getDimensionStatus(volumeScore),
           read:
-            volumeScore >= 75
+            inputs.monthlyConversions < 50
+              ? "Too little conversion signal for a reliable lift test."
+              : inputs.monthlyConversions < 150
+                ? "Signal is very thin; use diagnostics before budget tests."
+                : volumeScore >= 75
               ? "Enough signal for a credible first readout."
               : volumeScore >= 52
                 ? "Enough signal for directional testing if the design is narrow."
@@ -509,7 +578,7 @@ export const evaluateReadiness = (inputs: ReadinessInputs) => {
     })
     .sort((a, b) => a.score - b.score);
 
-  const weightedScore = Math.round(
+  const rawScore = Math.round(
     dimensionScores.reduce((total, dimension) => {
       const weight =
         dimension.key === "data"
@@ -525,6 +594,7 @@ export const evaluateReadiness = (inputs: ReadinessInputs) => {
       return total + dimension.score * weight;
     }, 0),
   );
+  const weightedScore = Math.min(rawScore, signalCap);
 
   const level: ReadinessLevel =
     weightedScore >= 82
@@ -537,14 +607,20 @@ export const evaluateReadiness = (inputs: ReadinessInputs) => {
 
   const blocker = dimensionScores[0];
   const canTestNow =
-    blocker.score >= 66
+    inputs.monthlyConversions < 50
+      ? "Do not run an incrementality test yet. Use analytics QA, attribution-bias review, and event-volume growth first."
+      : inputs.monthlyConversions < 150
+        ? "Only a directional platform holdout or diagnostic audit is realistic at this volume."
+        : blocker.score >= 66
       ? "A controlled lift test can be planned now if the decision rule is documented before launch."
       : blocker.key === "volume"
         ? "Run an attribution-bias audit or platform holdout before attempting a large geo test."
         : `Do not launch a major lift test until ${blocker.label.toLowerCase()} is tightened.`;
 
   const notYet =
-    blocker.score >= 66
+    inputs.monthlyConversions < 150
+      ? "Do not use this setup for geo tests, multi-channel incrementality claims, or high-stakes budget reallocation."
+      : blocker.score >= 66
       ? "Avoid broad multi-channel readouts until one repeatable test motion has been proven."
       : "Avoid using this score as permission to make a large budget move without fixing the blocker first.";
 
@@ -595,7 +671,14 @@ export const evaluateReadiness = (inputs: ReadinessInputs) => {
             };
 
   const recommendedDesign: RecommendedTestDesign =
-    answer("source_of_truth") === "fragmented" ||
+    inputs.monthlyConversions < 50
+      ? {
+          name: "Signal-building measurement audit",
+          fit: "Monthly conversion volume is too low for a credible lift readout. The right first step is to improve event volume, tracking quality, and channel diagnostics.",
+          caution:
+            "A low-volume lift test can produce a confident-looking answer that is mostly noise.",
+        }
+      : answer("source_of_truth") === "fragmented" ||
     answer("campaign_taxonomy") === "messy" ||
     answer("metric_hierarchy") === "unclear" ||
     answer("owner") === "unclear"
@@ -682,6 +765,9 @@ export const evaluateReadiness = (inputs: ReadinessInputs) => {
     boardMemo,
     clientReadyReport,
     roadmap,
+    rawScore,
+    signalCap,
+    limitingConstraints,
     dimensionScores,
     evidence,
   };
@@ -699,6 +785,15 @@ export const formatReadinessReport = (inputs: ReadinessInputs) => {
     `Monthly conversions: ${inputs.monthlyConversions.toLocaleString("en-US")}`,
     `Monthly media spend: $${inputs.monthlySpend.toLocaleString("en-US")}`,
     `Active paid channels: ${inputs.channels}`,
+    ...(result.limitingConstraints.length > 0
+      ? [
+          "",
+          "Hard constraints:",
+          ...result.limitingConstraints.map(
+            (constraint) => `- ${constraint.label}: ${constraint.read}`,
+          ),
+        ]
+      : []),
     "",
     "What you can test now:",
     result.canTestNow,

@@ -359,6 +359,17 @@ export function ReadinessScorePage() {
               <p>{result.blocker.read}</p>
             </div>
 
+            {result.limitingConstraints.length > 0 ? (
+              <div className="readiness-hard-constraints">
+                <span>Hard constraints</span>
+                {result.limitingConstraints.map((constraint) => (
+                  <p key={constraint.label}>
+                    <strong>{constraint.label}:</strong> {constraint.read}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+
             <div className="readiness-test-design-card">
               <span>Recommended test design</span>
               <strong>{result.recommendedDesign.name}</strong>

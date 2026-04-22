@@ -2240,6 +2240,35 @@ select {
   line-height: 1.45;
 }
 
+.readiness-hard-constraints {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 239, 222, 0.94);
+  border: 1px solid rgba(201, 109, 26, 0.22);
+}
+
+.readiness-hard-constraints > span {
+  color: #8c4b10;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.readiness-hard-constraints p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.42;
+}
+
+.readiness-hard-constraints strong {
+  color: #7b4a10;
+}
+
 .readiness-board-memo {
   display: grid;
   gap: 8px;
